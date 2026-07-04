@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typing Speed Test</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      color: #1a1a1a;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #1a1a1a;
+    }
+
+    h1 span {
+      color: #4f8ef7;
+    }
+
+    /* Top Row */
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    /* Difficulty Buttons */
+    .diff-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .diff-btn {
+      padding: 7px 16px;
+      border: 1px solid #dde3ec;
+      border-radius: 8px;
+      background: #fff;
+      color: #555;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .diff-btn:hover {
+      background: #f7f9fc;
+    }
+
+    .diff-btn.active {
+      background: #f7f9fc;
+      border-color: #4f8ef7;
+      color: #1a1a1a;
+    }
+
+    /* Timer Box */
+    .timer-box {
+      background: #fff;
+      border: 1px solid #dde3ec;
+      border-radius: 10px;
+      padding: 8px 20px;
+      text-align: center;
+    }
+
+    .timer-val {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .timer-lbl {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat {
+      background: #fff;
+      border: 1px solid #e4eaf2;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .stat-lbl {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    /* Result Banner */
+    .result-banner {
+      background: #f0faf4;
+      border: 1px solid #6fcf97;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .result-big {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a7f4b;
+    }
+
+    .result-sub {
+      font-size: 13px;
+      color: #2e7d5e;
+      margin-top: 4px;
+    }
+
+    /* Passage Box */
+    .passage-box {
+      background: #fff;
+      border: 1px solid #dde3ec;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+      font-size: 18px;
+      line-height: 1.9;
+      letter-spacing: 0.01em;
+      min-height: 110px;
+      word-break: break-word;
+    }
+
+    /* Character highlighting */
+    .char-default {
+      color: #bbb;
+    }
+
+    .char-correct {
+      color: #1a7f4b;
+    }
+
+    .char-wrong {
+      color: #c0392b;
+      background: #fff5f5;
+      border-radius: 2px;
+    }
+
+    .char-cursor {
+      border-left: 2px solid #1a1a1a;
+      margin-left: -1px;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Hint */
+    .hint {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Typing Input */
+    .type-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #dde3ec;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: 'Courier New', monospace;
+      background: #fff;
+      color: #1a1a1a;
+      outline: none;
+      resize: none;
+      min-height: 80px;
+      transition: border-color 0.2s;
+    }
+
+    .type-input:focus {
+      border-color: #4f8ef7;
+      box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.12);
+    }
+
+    .type-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Button Row */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: 1px solid #dde3ec;
+      border-radius: 10px;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .btn:hover {
+      background: #f7f9fc;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Timer turns red when low */
+    .timer-danger {
+      color: #c0392b !important;
+    }
+
+    @media (max-width: 420px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .passage-box { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <h1>⌨️ Typing <span>Speed</span> Test</h1>
+
+    <!-- Difficulty + Timer -->
+    <div class="top-row">
+      <div class="diff-row">
+        <button class="diff-btn active" id="d-easy" onclick="setDiff('easy')">Easy</button>
+        <button class="diff-btn" id="d-medium" onclick="setDiff('medium')">Medium</button>
+        <button class="diff-btn" id="d-hard" onclick="setDiff('hard')">Hard</button>
+      </div>
+      <div class="timer-box">
+        <div class="timer-val" id="timer-val">30</div>
+        <div class="timer-lbl">seconds</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-val" id="wpm-val">0</div>
+        <div class="stat-lbl">WPM</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="acc-val">100%</div>
+        <div class="stat-lbl">Accuracy</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="correct-val">0</div>
+        <div class="stat-lbl">Correct</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="errors-val">0</div>
+        <div class="stat-lbl">Errors</div>
+      </div>
+    </div>
+
+    <!-- Result Banner (shown after test ends) -->
+    <div class="result-banner" id="result-banner">
+      <div class="result-big" id="result-big"></div>
+      <div class="result-sub" id="result-sub"></div>
+    </div>
+
+    <!-- Passage to type -->
+    <div class="passage-box" id="passage-box"></div>
+
+    <p class="hint">Start typing below — the timer begins automatically</p>
+
+    <!-- Typing Area -->
+    <textarea
+      class="type-input"
+      id="type-input"
+      placeholder="Type here..."
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+    ></textarea>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn" onclick="restart()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Restart
+      </button>
+      <button class="btn" onclick="newPassage()">
+        <i class="ti ti-arrow-right" aria-hidden="true"></i> New passage
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------
+    // Passages grouped by difficulty
+    // Add your own by following the same format!
+    // -------------------------------------------------------
+    const passages = {
+      easy: [
+        "The sun rises in the east and sets in the west. Every day is a new chance to do something good. Small steps lead to big changes over time.",
+        "Dogs are loyal animals that love to play and run. They make great friends for people of all ages. A happy dog wags its tail all day long.",
+        "Coding is a skill that anyone can learn with practice. Start small and build up your knowledge day by day. Soon you will be able to create amazing things."
+      ],
+      medium: [
+        "JavaScript is a programming language that runs in the browser. It allows developers to create dynamic and interactive web pages. Learning it opens the door to building real applications.",
+        "The best way to improve your typing speed is to practice every single day. Focus on accuracy first, then speed will follow naturally over time. Consistency is the key to any skill.",
+        "Web development involves three core technologies: HTML for structure, CSS for styling, and JavaScript for interactivity. Together they form the foundation of every website you visit."
+      ],
+      hard: [
+        "Asynchronous programming in JavaScript uses callbacks, promises, and async/await syntax to handle non-blocking operations efficiently. Understanding the event loop is crucial for writing performant code.",
+        "The Document Object Model, or DOM, is a programming interface that represents the structure of an HTML document as a tree of objects that JavaScript can manipulate dynamically.",
+        "Responsive web design uses flexible grids, fluid images, and CSS media queries to ensure that web pages render correctly across a wide variety of screen sizes and devices."
+      ]
+    };
+
+    // -------------------------------------------------------
+    // State variables
+    // -------------------------------------------------------
+    let diff = 'easy';
+    let passage = '';
+    let timer = null;
+    let timeLeft = 30;
+    let started = false;
+    let finished = false;
+    let errors = 0;
+
+    // -------------------------------------------------------
+    // Pick a random passage from the selected difficulty
+    // -------------------------------------------------------
+    function pickPassage() {
+      const list = passages[diff];
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    // -------------------------------------------------------
+    // Render the passage with colour-coded characters
+    // green = correct, red = wrong, blinking cursor = current
+    // -------------------------------------------------------
+    function renderPassage(typed) {
+      let html = '';
+
+      for (let i = 0; i < passage.length; i++) {
+        const ch = passage[i] === ' ' ? '&nbsp;' : passage[i];
+
+        if (i < typed.length) {
+          if (typed[i] === passage[i]) {
+            html += `<span class="char-correct">${ch}</span>`;
+          } else {
+            html += `<span class="char-wrong">${passage[i] === ' ' ? '&nbsp;' : passage[i]}</span>`;
+          }
+        } else if (i === typed.length) {
+          // Blinking cursor at current position
+          html += `<span class="char-default char-cursor">${ch}</span>`;
+        } else {
+          html += `<span class="char-default">${ch}</span>`;
+        }
+      }
+
+      document.getElementById('passage-box').innerHTML = html;
+    }
+
+    // -------------------------------------------------------
+    // Update WPM, accuracy, correct chars, errors
+    // -------------------------------------------------------
+    function updateStats(typed) {
+      let correct = 0;
+      let err = 0;
+
+      for (let i = 0; i < typed.length; i++) {
+        if (typed[i] === passage[i]) correct++;
+        else err++;
+      }
+
+      // WPM formula: (correct characters / 5) / minutes elapsed
+      const elapsed = Math.max(30 - timeLeft, 1);
+      const wpm = Math.round((correct / 5 / elapsed) * 60);
+      const acc = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+
+      document.getElementById('wpm-val').textContent = started ? wpm : 0;
+      document.getElementById('acc-val').textContent = acc + '%';
+      document.getElementById('correct-val').textContent = correct;
+      document.getElementById('errors-val').textContent = err;
+      errors = err;
+    }
+
+    // -------------------------------------------------------
+    // Start the 30-second countdown timer
+    // -------------------------------------------------------
+    function startTimer() {
+      started = true;
+      timer = setInterval(function () {
+        timeLeft--;
+        document.getElementById('timer-val').textContent = timeLeft;
+
+        // Turn timer red when 10 seconds or less remain
+        if (timeLeft <= 10) {
+          document.getElementById('timer-val').classList.add('timer-danger');
+        }
+
+        // Update stats every second
+        const typed = document.getElementById('type-input').value;
+        updateStats(typed);
+
+        // Time's up!
+        if (timeLeft <= 0) {
+          endTest();
+        }
+      }, 1000);
+    }
+
+    // -------------------------------------------------------
+    // End the test — show final results
+    // -------------------------------------------------------
+    function endTest() {
+      clearInterval(timer);
+      finished = true;
+      document.getElementById('type-input').disabled = true;
+
+      const typed = document.getElementById('type-input').value;
+      let correct = 0;
+      for (let i = 0; i < typed.length; i++) {
+        if (typed[i] === passage[i]) correct++;
+      }
+
+      const wpm = Math.round((correct / 5 / 30) * 60);
+      const acc = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 0;
+
+      let grade;
+      if (wpm >= 70) grade = 'Excellent — you are a fast typer!';
+      else if (wpm >= 50) grade = 'Great speed — above average!';
+      else if (wpm >= 30) grade = 'Good effort — keep practicing!';
+      else grade = 'Keep going — practice makes perfect!';
+
+      document.getElementById('result-big').textContent = `${wpm} WPM — ${grade}`;
+      document.getElementById('result-sub').textContent =
+        `Accuracy: ${acc}%  ·  Correct characters: ${correct}  ·  Errors: ${errors}`;
+      document.getElementById('result-banner').style.display = 'block';
+    }
+
+    // -------------------------------------------------------
+    // Reset everything and start fresh
+    // -------------------------------------------------------
+    function restart() {
+      clearInterval(timer);
+      passage = pickPassage();
+      timeLeft = 30;
+      started = false;
+      finished = false;
+      errors = 0;
+
+      document.getElementById('timer-val').textContent = 30;
+      document.getElementById('timer-val').classList.remove('timer-danger');
+      document.getElementById('wpm-val').textContent = 0;
+      document.getElementById('acc-val').textContent = '100%';
+      document.getElementById('correct-val').textContent = 0;
+      document.getElementById('errors-val').textContent = 0;
+      document.getElementById('result-banner').style.display = 'none';
+      document.getElementById('type-input').value = '';
+      document.getElementById('type-input').disabled = false;
+      document.getElementById('type-input').focus();
+
+      renderPassage('');
+    }
+
+    function newPassage() {
+      restart();
+    }
+
+    // -------------------------------------------------------
+    // Switch difficulty level
+    // -------------------------------------------------------
+    function setDiff(d) {
+      diff = d;
+      ['easy', 'medium', 'hard'].forEach(function (x) {
+        document.getElementById('d-' + x).className =
+          'diff-btn' + (x === d ? ' active' : '');
+      });
+      restart();
+    }
+
+    // -------------------------------------------------------
+    // Listen for typing — start timer on first keystroke,
+    // update display on every character
+    // -------------------------------------------------------
+    document.getElementById('type-input').addEventListener('input', function () {
+      if (finished) return;
+
+      // Start timer on first keystroke
+      if (!started) startTimer();
+
+      const typed = this.value;
+      renderPassage(typed);
+      updateStats(typed);
+
+      // End test early if passage is completed
+      if (typed.length >= passage.length) {
+        endTest();
+      }
+    });
+
+    // Start the app
+    restart();
+  </script>
+
+</body>
+</html>
